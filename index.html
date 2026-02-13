@@ -251,8 +251,8 @@
         <!-- INTRO -->
         <section class="scene active" id="sceneIntro">
           <div class="introCard">
-            <h1 class="introTitle">Amor, <span class="grad">amo-te muito</span>.</h1>
-            <p class="introText">E tenho o maior prazer de te perguntar…</p>
+            <h1 class="introTitle">Lara Barbosa Machado <span class="grad">💍</span></h1>
+            <p class="introText">Eu tenho o maior prazer de te perguntar…</p>
 
             <div class="introActions">
               <button class="primary" id="goBtn">Continua 💖</button>
@@ -313,7 +313,6 @@
     }
 
     goBtn.addEventListener("click", ()=> showScene("ask"));
-    skipBtn.addEventListener("click", ()=> showScene("ask"));
 
     // hearts background
     function spawnHeart(){
@@ -349,27 +348,31 @@
     }
 
     yesBtn.addEventListener("click", ()=>{
-      showMessage("YAAAY! 💘");
+      showMessage("Amo-te muito! 💘");
       popConfetti();
+      
+      setTimeout(()=>{
+        showMessage("Nos vemos amanhã amor, txi amo 💕");
+      }, 2000);
     });
 
-    // "No" desvia-se dentro da zona dos botões (sem desaparecer)
+    // "No" desvia-se por toda a página
     let noDX = 0, noDY = 0;
 
     function moveNo(){
-      const actions = document.querySelector(".actions");
-      const a = actions.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
       const b = noBtn.getBoundingClientRect();
 
-      // limites para ele não sair da zona dos botões
-      const margin = 6;
-      const maxLeft  = (a.left + margin) - b.left;
-      const maxRight = (a.right - margin) - b.right;
-      const maxUp    = (a.top + margin) - b.top;
-      const maxDown  = (a.bottom - margin) - b.bottom;
+      // limites para ele não sair do viewport
+      const margin = 10;
+      const maxLeft  = margin - b.left;
+      const maxRight = (viewportWidth - margin) - b.right;
+      const maxUp    = margin - b.top;
+      const maxDown  = (viewportHeight - margin) - b.bottom;
 
       // tenta mexer um bocadinho (suave)
-      const step = 70; // quanto "foge"
+      const step = 70;
       const dx = (Math.random() < 0.5 ? -1 : 1) * (40 + Math.random() * step);
       const dy = (Math.random() < 0.5 ? -1 : 1) * (10 + Math.random() * 40);
 
@@ -379,8 +382,24 @@
 
       noBtn.style.transform = `translate(${noDX}px, ${noDY}px)`;
     }
-    noBtn.addEventListener("mouseenter", moveNo);
-    noBtn.addEventListener("touchstart", (e)=>{ e.preventDefault(); moveNo(); }, {passive:false});
+
+    // foge quando o cursor se aproxima
+    let lastMove = 0;
+    document.addEventListener("mousemove", (e)=>{
+      const now = Date.now();
+      if(now - lastMove < 50) return; // throttle: máximo 20x por segundo
+      lastMove = now;
+      
+      const b = noBtn.getBoundingClientRect();
+      const bx = b.left + b.width / 2;
+      const by = b.top + b.height / 2;
+      
+      const dist = Math.sqrt(Math.pow(e.clientX - bx, 2) + Math.pow(e.clientY - by, 2));
+      
+      if(dist < 100){
+        moveNo();
+      }
+    });
   </script>
 </body>
 </html>
