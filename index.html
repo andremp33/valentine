@@ -189,6 +189,8 @@
       background: rgba(255,255,255,.08);
       color: var(--text);
       border: 1px solid rgba(255,255,255,.16);
+      position: relative;
+      will-change: transform;
     }
 
     .msg{
@@ -232,8 +234,6 @@
       100%{ transform: translateY(-120vh) scale(1.35) rotate(8deg); opacity:0; }
     }
 
-    /* “No” foge */
-    .no.floating{ position: fixed; z-index: 20; }
   </style>
 </head>
 <body>
@@ -267,7 +267,7 @@
         <section class="scene" id="sceneAsk">
           <div class="questionWrap">
             <div class="photoCard">
-              <img src="dachshund.png" alt="Cão salsicha com balões em forma de coração">
+              <img src="dachshund_clean.png" alt="Cão salsicha com balões em forma de coração">
             </div>
 
             <div class="ask">
@@ -354,23 +354,31 @@
       popConfetti();
     });
 
-    // “No” foge dentro do painel
+    // "No" desvia-se dentro da zona dos botões (sem desaparecer)
+    let noDX = 0, noDY = 0;
+
     function moveNo(){
-      const rect = panel.getBoundingClientRect();
-      const btn = noBtn.getBoundingClientRect();
-      const pad = 20;
+      const actions = document.querySelector(".actions");
+      const a = actions.getBoundingClientRect();
+      const b = noBtn.getBoundingClientRect();
 
-      const minX = rect.left + pad;
-      const maxX = rect.right - btn.width - pad;
-      const minY = rect.top + pad + 40;
-      const maxY = rect.bottom - btn.height - pad;
+      // limites para ele não sair da zona dos botões
+      const margin = 6;
+      const maxLeft  = (a.left + margin) - b.left;
+      const maxRight = (a.right - margin) - b.right;
+      const maxUp    = (a.top + margin) - b.top;
+      const maxDown  = (a.bottom - margin) - b.bottom;
 
-      const x = minX + Math.random() * (maxX - minX);
-      const y = minY + Math.random() * (maxY - minY);
+      // tenta mexer um bocadinho (suave)
+      const step = 70; // quanto "foge"
+      const dx = (Math.random() < 0.5 ? -1 : 1) * (40 + Math.random() * step);
+      const dy = (Math.random() < 0.5 ? -1 : 1) * (10 + Math.random() * 40);
 
-      noBtn.classList.add("floating");
-      noBtn.style.left = x + "px";
-      noBtn.style.top  = y + "px";
+      // acumula e limita
+      noDX = Math.min(Math.max(noDX + dx, maxLeft), maxRight);
+      noDY = Math.min(Math.max(noDY + dy, maxUp), maxDown);
+
+      noBtn.style.transform = `translate(${noDX}px, ${noDY}px)`;
     }
     noBtn.addEventListener("mouseenter", moveNo);
     noBtn.addEventListener("touchstart", (e)=>{ e.preventDefault(); moveNo(); }, {passive:false});
